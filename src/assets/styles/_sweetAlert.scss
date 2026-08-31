@@ -1,0 +1,69 @@
+.sweetalert-container {
+  font-family: "Noto Sans Lao", serif !important;
+}
+
+.sweetalert-popup {
+  width: 20rem !important;
+  border-radius: 20px !important;
+
+  @apply bg-white shadow-xl;
+
+  @screen md {
+    width: 23rem !important;
+  }
+}
+
+.sweetalert-icon {
+  width: 3.7rem !important;
+  height: 3.7rem !important;
+}
+
+.sweetalert-title {
+  font-size: 1.5rem !important;
+}
+
+.sweetalert-text {
+  font-size: 1rem !important;
+}
+
+.sweetalert-buttons {
+  font-size: 0.9rem !important;
+  width: 120px;
+  padding: 0.5rem 1.5rem !important;
+  background: #009D91 !important;
+  outline: none !important;
+  border-radius: 999px !important;
+}
+
+.swal2-textarea {
+  padding: 0.5rem 1rem !important;
+  border-radius: 10px !important;
+}
+
+.sweetalert-buttons-danger {
+  font-size: 0.9rem !important;
+  width: 120px;
+  padding: 0.5rem 1.5rem !important;
+  color: #009D91 !important;
+  background-color: white !important;
+  border: 1px solid #009D91 !important;
+  outline: none !important;
+  border-radius: 999px !important;
+}
+
+/* Dark mode styles with #111113 color */
+.dark .sweetalert-popup {
+  @apply bg-[#18181B] text-white;
+}
+
+.dark .sweetalert-buttons {
+  @apply bg-teal-600 text-white;
+}
+
+.dark .sweetalert-buttons-danger {
+  @apply bg-[#18181B] text-teal-400 border-teal-400;
+}
+
+.dark .swal2-textarea {
+  @apply bg-[#18181B] text-white;
+}

@@ -1,0 +1,85 @@
+import { cloneElement, forwardRef, HTMLAttributes, ReactElement, ReactNode, useRef } from 'react';
+import classNames from 'classnames';
+import useDomRect from '../../hooks/useDomRect';
+import useDir from '../../hooks/useDir';
+import { IValidationBaseProps } from './Validation';
+
+interface IFieldWrapProps extends HTMLAttributes<HTMLDivElement>, Partial<IValidationBaseProps> {
+	children: ReactElement;
+	className?: string;
+	firstSuffix?: ReactNode;
+	lastSuffix?: ReactNode;
+}
+const FieldWrap = forwardRef<HTMLDivElement, IFieldWrapProps>((props, ref) => {
+	const {
+		children,
+		className,
+		firstSuffix,
+		lastSuffix,
+		isValidMessage,
+		isValid,
+		isTouched,
+		invalidFeedback,
+		validFeedback,
+		...rest
+	} = props;
+
+	const sharedClasses = classNames(
+		'absolute top-[2px] bottom-[2px] flex justify-center items-center px-1 rounded',
+	);
+
+	const divFirstRef = useRef<HTMLDivElement>(null);
+	const [domFirstRect] = useDomRect(divFirstRef);
+
+	const divLastRef = useRef<HTMLDivElement>(null);
+	const [domLastRect] = useDomRect(divLastRef);
+
+	const { isLTR } = useDir();
+
+	return (
+		<div
+			ref={ref}
+			data-component-name='FieldWrap'
+			className={classNames('relative', className)}
+			{...rest}>
+			{/* Ensure firstSuffix is always visible with a minimum width */}
+
+			{cloneElement(children, {
+				isValid,
+				isTouched,
+				invalidFeedback,
+				style: {
+					paddingLeft:
+						(firstSuffix && isLTR && domFirstRect?.width) ||
+						(lastSuffix && !isLTR && domLastRect?.width),
+					paddingRight:
+						(firstSuffix && !isLTR && domFirstRect?.width) ||
+						(lastSuffix && isLTR && domLastRect?.width),
+				},
+			})}
+			{firstSuffix && (
+				<div
+					ref={divFirstRef}
+					className={classNames(sharedClasses, 'start-px', 'min-w-[20px]')}>
+					{firstSuffix}
+				</div>
+			)}
+			{/* Ensure lastSuffix is always visible with a minimum width */}
+			{lastSuffix && (
+				<div
+					ref={divLastRef}
+					className={classNames(sharedClasses, 'end-px', 'min-w-[20px]')}>
+					{lastSuffix}
+				</div>
+			)}
+		</div>
+	);
+});
+
+FieldWrap.defaultProps = {
+	className: undefined,
+	firstSuffix: undefined,
+	lastSuffix: undefined,
+};
+
+export default FieldWrap;
