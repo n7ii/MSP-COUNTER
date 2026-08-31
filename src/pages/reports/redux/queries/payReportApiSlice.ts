@@ -18,6 +18,15 @@ export type PayDashboardParams = {
 	dateEnd?: string;
 };
 
+export type PayDashboardBody = {
+	successTransaction?: number;
+	errorTransaction?: number;
+	holdTransaction?: number;
+	revertTransaction?: number;
+	allTransaction?: number;
+	totalLak?: number | null;
+};
+
 export const payReportApiSlice = createApi({
 	reducerPath: 'payReportApiSlice',
 	baseQuery,
@@ -39,7 +48,7 @@ export const payReportApiSlice = createApi({
 				{ type: 'PayReport', id: `${service}_HISTORY_${page}` },
 			],
 		}),
-		getPayDashboard: builder.query<any, PayDashboardParams>({
+		getPayDashboard: builder.query<{ body?: PayDashboardBody }, PayDashboardParams>({
 			query: ({ service, dateStart, dateEnd }) => ({
 				url: `/pay/report/${service}/dashboard`,
 				method: 'GET',
