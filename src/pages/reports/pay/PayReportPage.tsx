@@ -381,6 +381,7 @@ const PayReportPage = ({
 						soldOutLakLabel={soldOutLakLabel}
 						soldOutUsdLabel={soldOutUsdLabel}
 						showIncomeSummary={false}
+						showTotalLak
 					/>
 
 					<Card className='h-full'>

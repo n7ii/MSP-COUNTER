@@ -15,6 +15,7 @@ type VolteyDashboardBody = {
 	holdTransaction?: number;
 	revertTransaction?: number;
 	allTransaction?: number;
+	totalLak?: number | null;
 	totalIncomeLak?: number;
 	incomeLak?: number;
 	incomeFeeLak?: number;
@@ -28,6 +29,7 @@ type VolteyDashboardProps = {
 	soldOutLakLabel?: string;
 	soldOutUsdLabel?: string;
 	showIncomeSummary?: boolean;
+	showTotalLak?: boolean;
 };
 
 const formatMoney = (value?: number, ccy?: string) => {
@@ -38,12 +40,21 @@ const formatMoney = (value?: number, ccy?: string) => {
 	})} ${ccy || ''}`.trim();
 };
 
+const formatTotalLak = (value?: number | null) => {
+	const amount = value ?? 0;
+	return `${Number(amount).toLocaleString('en-US', {
+		minimumFractionDigits: 2,
+		maximumFractionDigits: 2,
+	})} LAK`;
+};
+
 const VolteyDashboard = ({
 	data,
 	title = 'ພາບລວມ Voltey',
 	soldOutLakLabel = 'ຍອດທີ່ຕ້ອງສົ່ງໃຫ້ Voltey (LAK)',
 	soldOutUsdLabel = 'ຍອດທີ່ຕ້ອງສົ່ງໃຫ້ Voltey (USD)',
 	showIncomeSummary = true,
+	showTotalLak = false,
 }: VolteyDashboardProps) => {
 	const countItems = [
 		{
@@ -52,6 +63,17 @@ const VolteyDashboard = ({
 			gradient: 'bg-blue-50 dark:bg-blue-800/30 border border-blue-100 dark:border-blue-800/40',
 			icon: <FaExchangeAlt className='text-blue-500' size={20} />,
 		},
+		...(showTotalLak
+			? [
+					{
+						label: 'ຍອດລວມ (LAK)',
+						value: formatTotalLak(data?.totalLak),
+						gradient:
+							'bg-emerald-50 dark:bg-emerald-800/30 border border-emerald-100 dark:border-emerald-800/40',
+						icon: <FaMoneyBillWave className='text-emerald-600' size={20} />,
+					},
+				]
+			: []),
 		{
 			label: 'ສຳເລັດ',
 			value: data?.successTransaction || 0,
@@ -132,7 +154,8 @@ const VolteyDashboard = ({
 						</CardHeaderChild>
 					</CardHeader>
 					<CardBody className='p-4'>
-						<ul className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5'>
+						<ul
+							className={`grid grid-cols-1 gap-4 sm:grid-cols-2 ${showTotalLak ? 'lg:grid-cols-3 xl:grid-cols-6' : 'lg:grid-cols-5'}`}>
 							{countItems.map((item) => (
 								<li
 									key={item.label}
