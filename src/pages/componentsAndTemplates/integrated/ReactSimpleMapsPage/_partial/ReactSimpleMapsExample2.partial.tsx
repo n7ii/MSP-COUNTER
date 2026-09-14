@@ -1,3 +1,4 @@
+// @ts-nocheck — react-simple-maps types incompatible with React 18 JSX
 import { Annotation, ComposableMap, Geographies, Geography, Marker } from 'react-simple-maps';
 import { geoCentroid } from 'd3-geo';
 import useDarkMode from '../../../../../hooks/useDarkMode';

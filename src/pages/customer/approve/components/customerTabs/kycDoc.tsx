@@ -1,228 +1,233 @@
-import React, { useState } from 'react';
-import { Card, CardBody, CardHeader } from '@heroui/react';
+import { useState } from 'react';
+import { Card, CardBody, CardHeader, Chip } from '@heroui/react';
 import { PhotoProvider, PhotoView } from 'react-photo-view';
 import 'react-photo-view/dist/react-photo-view.css';
 import { LuEye } from 'react-icons/lu';
 
-interface DocFile {
-	id: number;
-	pageType: string;
-	url: string;
-	name: string;
-	createdBy: string;
-}
-
-interface DocItem {
-	docType: string;
-	docFiles: DocFile[];
-}
-
 interface Props {
-	isMeepom: boolean;
-	content: DocItem[];
+	isMeepom?: boolean;
+	msp?: any;
+	meepom?: any;
 }
 
-const KycDoc: React.FC<Props> = ({ isMeepom, content }: any) => {
-	// ✅ Track hover state for each card
-	const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+const DocMetaCards = ({
+	docNo,
+	exp,
+}: {
+	docNo?: string | null;
+	exp?: string | null;
+}) => {
+	if (!docNo && !exp) return null;
 
-	console.log('content', content);
 	return (
-		<div className='space-y-8 py-4'>
-			{isMeepom ? (
-				<>
-					<section key={content?.docType}>
-						<h2 className='mb-4 text-xl font-bold'>{content?.docType}</h2>
-						<PhotoProvider>
-							<div className='grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'>
-								{content && content.length > 0 ? (
-									(() => {
-										const docFile = content[0]; // Access first document
-										const fullUrl = import.meta.env.VITE_IMAGE_MEPHOM_URL;
+		<div className='mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2'>
+			{docNo ? (
+				<div className='rounded-2xl border-2 border-primary-200 bg-primary-50 px-6 py-5 dark:border-primary-700 dark:bg-primary-950/40'>
+					<p className='text-sm font-semibold uppercase tracking-wide text-primary-600 dark:text-primary-300'>
+						Doc No
+					</p>
+					<p className='mt-1 break-all text-3xl font-bold leading-tight text-gray-900 dark:text-white'>
+						{docNo}
+					</p>
+				</div>
+			) : null}
+			{exp ? (
+				<div className='rounded-2xl border-2 border-amber-200 bg-amber-50 px-6 py-5 dark:border-amber-700 dark:bg-amber-950/40'>
+					<p className='text-sm font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-300'>
+						Exp
+					</p>
+					<p className='mt-1 text-3xl font-bold leading-tight text-gray-900 dark:text-white'>
+						{exp}
+					</p>
+				</div>
+			) : null}
+		</div>
+	);
+};
 
-										console.log(
-											'fullUrl + docFile.rfDocPhoto1',
-											fullUrl + docFile.rfDocPhoto1,
-										);
-										return (
-											<>
-												<Card
-													key={docFile.rfDocNo}
-													className='z-0 w-full py-4'>
-													<CardHeader className='flex-col items-start px-4 pb-0 pt-2'>
-														<p className='text-tiny font-bold uppercase'>
-															Document No: {docFile.rfDocNo}
-														</p>
-														<small className='text-default-500'>
-															Created By: {docFile.createdBy}
-														</small>
-													</CardHeader>
-													<CardBody className='overflow-visible py-2'>
-														<video
-															controls
-															className='mx-auto mb-4 w-full max-w-[300px] rounded-xl object-cover'
-															src={fullUrl + docFile.shortVideo}
-															onError={() =>
-																console.error(
-																	'Video failed to load:',
-																	fullUrl,
-																)
-															}>
-															Your browser does not support the video
-															tag.
-														</video>
-													</CardBody>
-												</Card>
+const MediaCard = ({
+	title,
+	subtitle,
+	children,
+}: {
+	title: string;
+	subtitle?: string;
+	children: React.ReactNode;
+}) => (
+	<Card className='z-0 w-full py-4'>
+		<CardHeader className='flex-col items-start px-4 pb-0 pt-2'>
+			<p className='text-tiny font-bold uppercase'>{title}</p>
+			{subtitle ? <small className='text-default-500'>{subtitle}</small> : null}
+		</CardHeader>
+		<CardBody className='overflow-visible py-2'>{children}</CardBody>
+	</Card>
+);
 
-												{/* ✅ Show Additional Photos (Outside Card) */}
-												<div className='mb-4 flex flex-wrap justify-center gap-4'>
-													<Card
-														key={docFile.rfDocNo}
-														className='z-0 w-full py-4'>
-														<CardHeader className='flex-col items-start px-4 pb-0 pt-2'>
-															<p className='text-tiny font-bold uppercase'>
-																Document No: {docFile.rfDocNo}
-															</p>
-															<small className='text-default-500'>
-																Created By: {docFile.createdBy}
-															</small>
-														</CardHeader>
-														<CardBody className='overflow-visible py-2'>
-															<PhotoView
-																src={fullUrl + docFile.rfDocPhoto1}>
-																<img
-																	alt='Document 1'
-																	className='h-auto w-full max-w-[300px] rounded-xl object-cover'
-																	src={
-																		fullUrl +
-																		docFile.rfDocPhoto1
-																	}
-																	onError={() =>
-																		console.error(
-																			'Image failed to load:',
-																			fullUrl +
-																				docFile.rfDocPhoto1,
-																		)
-																	}
-																/>
-															</PhotoView>
-														</CardBody>
-													</Card>
-												</div>
-												<Card
-													key={docFile.rfDocNo}
-													className='z-0 w-full py-4'>
-													<CardHeader className='flex-col items-start px-4 pb-0 pt-2'>
-														<p className='text-tiny font-bold uppercase'>
-															Document No: {docFile.rfDocNo}
-														</p>
-														<small className='text-default-500'>
-															Created By: {docFile.createdBy}
-														</small>
-													</CardHeader>
-													<CardBody className='overflow-visible py-2'>
-														<PhotoView
-															src={fullUrl + docFile.rfDocPhoto2}>
-															<img
-																alt='Document 2'
-																className='h-auto w-full max-w-[300px] rounded-xl object-cover'
-																src={fullUrl + docFile.rfDocPhoto2}
-																onError={() =>
-																	console.error(
-																		'Image failed to load:',
-																		fullUrl +
-																			docFile.rfDocPhoto2,
-																	)
-																}
-															/>
-														</PhotoView>
-													</CardBody>
-												</Card>
-												{/* ✅ Document Details Inside Card */}
-											</>
-										);
-									})()
-								) : (
-									<p className='text-center text-red-500'>
-										No documents available
-									</p>
-								)}
-							</div>
-						</PhotoProvider>
-					</section>
-				</>
-			) : (
-				<>
-					<section key={content?.docType}>
-						<h2 className='mb-4 text-xl font-bold'>{content?.docType}</h2>
-						<PhotoProvider>
-							<div className='grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'>
-								{content?.docFiles?.map((docFile: any) => {
-									const fullUrl = import.meta.env.VITE_IMAGE_URL + docFile.url;
+const HoverImage = ({
+	src,
+	alt,
+	id,
+	hoveredCard,
+	setHoveredCard,
+}: {
+	src: string;
+	alt: string;
+	id: string | number;
+	hoveredCard: string | number | null;
+	setHoveredCard: (id: string | number | null) => void;
+}) => (
+	<PhotoView src={src}>
+		<div
+			className='relative mx-auto w-full max-w-[300px] cursor-pointer overflow-hidden rounded-xl'
+			onMouseEnter={() => setHoveredCard(id)}
+			onMouseLeave={() => setHoveredCard(null)}>
+			<img
+				alt={alt}
+				className='h-auto w-full max-w-[300px] rounded-xl object-cover'
+				src={src}
+				onError={() => console.error('Image failed to load:', src)}
+			/>
+			{hoveredCard === id && (
+				<div className='absolute inset-0 flex items-center justify-center rounded-xl bg-black/50 transition-opacity duration-200'>
+					<LuEye className='text-4xl text-white' />
+				</div>
+			)}
+		</div>
+	</PhotoView>
+);
 
-									return (
-										<Card key={docFile.id} className='z-0 w-full py-4'>
-											<CardHeader className='flex-col items-start px-4 pb-0 pt-2'>
-												<p className='text-tiny font-bold uppercase'>
-													Page Type: {docFile.pageType}
-												</p>
-												<small className='text-default-500'>
-													Created By: {docFile.createdBy}
-												</small>
-											</CardHeader>
-											<CardBody className='overflow-visible py-2'>
-												{docFile.pageType === 'VIDEO' ? (
-													<video
-														controls
-														className='mx-auto w-full max-w-[300px] rounded-xl object-cover'
-														src={fullUrl}
-														onError={() =>
-															console.error(
-																'Video failed to load:',
-																fullUrl,
-															)
-														}>
-														Your browser does not support the video tag.
-													</video>
-												) : (
-													<PhotoView src={fullUrl}>
-														<div
-															className='relative mx-auto w-full max-w-[300px] cursor-pointer overflow-hidden rounded-xl'
-															onMouseEnter={() =>
-																setHoveredCard(docFile.id)
-															}
-															onMouseLeave={() =>
-																setHoveredCard(null)
-															}>
-															<img
-																alt={docFile.name || 'Document'}
-																className='h-auto w-full max-w-[300px] rounded-xl object-cover'
-																src={fullUrl}
-																onError={() =>
-																	console.error(
-																		'Image failed to load:',
-																		fullUrl,
-																	)
-																}
-															/>
+const KycDoc = ({ msp, meepom }: Props) => {
+	const [hoveredCard, setHoveredCard] = useState<string | number | null>(null);
 
-															{/* ✅ Only show hover effect on the hovered card */}
-															{hoveredCard === docFile.id && (
-																<div className='absolute inset-0 flex items-center justify-center rounded-xl bg-black/50 transition-opacity duration-200'>
-																	<LuEye className='text-4xl text-white' />
-																</div>
-															)}
-														</div>
-													</PhotoView>
-												)}
-											</CardBody>
-										</Card>
-									);
-								})}
-							</div>
-						</PhotoProvider>
-					</section>
-				</>
+	const meepomBase = import.meta.env.VITE_IMAGE_MEPHOM_URL || '';
+	const mspBase = import.meta.env.VITE_IMAGE_URL || '';
+
+	const hasMeepom =
+		!!meepom &&
+		(meepom.shortVideo || meepom.rfDocPhoto1 || meepom.rfDocPhoto2 || meepom.profilePhoto);
+	const hasMsp = Array.isArray(msp?.docFiles) && msp.docFiles.length > 0;
+
+	if (!hasMeepom && !hasMsp) {
+		return <p className='py-8 text-center text-red-500'>No documents available</p>;
+	}
+
+	return (
+		<div className='space-y-10 py-4'>
+			{hasMeepom && (
+				<section>
+					<div className='mb-4 flex flex-wrap items-center gap-3'>
+						<h2 className='text-xl font-bold'>
+							{meepom.rfDocTypeName || 'Meepom Document'}
+						</h2>
+						<Chip size='sm' color='secondary' variant='flat'>
+							Meepom
+						</Chip>
+					</div>
+					<DocMetaCards docNo={meepom.rfDocNo} />
+					<PhotoProvider>
+						<div className='grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'>
+							{meepom.profilePhoto ? (
+								<MediaCard title='Profile Photo'>
+									<HoverImage
+										id='meepom-profile'
+										src={meepomBase + meepom.profilePhoto}
+										alt='Profile'
+										hoveredCard={hoveredCard}
+										setHoveredCard={setHoveredCard}
+									/>
+								</MediaCard>
+							) : null}
+
+							{meepom.shortVideo ? (
+								<MediaCard title='Short Video' subtitle={meepom.username}>
+									<video
+										controls
+										className='mx-auto w-full max-w-[300px] rounded-xl object-cover'
+										src={meepomBase + meepom.shortVideo}
+										onError={() =>
+											console.error(
+												'Video failed to load:',
+												meepomBase + meepom.shortVideo,
+											)
+										}>
+										Your browser does not support the video tag.
+									</video>
+								</MediaCard>
+							) : null}
+
+							{meepom.rfDocPhoto1 ? (
+								<MediaCard title='Document Photo 1'>
+									<HoverImage
+										id='meepom-photo1'
+										src={meepomBase + meepom.rfDocPhoto1}
+										alt='Document 1'
+										hoveredCard={hoveredCard}
+										setHoveredCard={setHoveredCard}
+									/>
+								</MediaCard>
+							) : null}
+
+							{meepom.rfDocPhoto2 ? (
+								<MediaCard title='Document Photo 2'>
+									<HoverImage
+										id='meepom-photo2'
+										src={meepomBase + meepom.rfDocPhoto2}
+										alt='Document 2'
+										hoveredCard={hoveredCard}
+										setHoveredCard={setHoveredCard}
+									/>
+								</MediaCard>
+							) : null}
+						</div>
+					</PhotoProvider>
+				</section>
+			)}
+
+			{hasMsp && (
+				<section>
+					<div className='mb-6 flex flex-wrap items-center gap-3'>
+						<h2 className='text-xl font-bold'>{msp.docType || msp.name || 'MSP Document'}</h2>
+						<Chip size='sm' color='primary' variant='flat'>
+							MSP
+						</Chip>
+					</div>
+
+					<DocMetaCards docNo={msp.dno} exp={msp.exp} />
+
+					<PhotoProvider>
+						<div className='grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'>
+							{msp.docFiles.map((docFile: any) => {
+								const fullUrl = mspBase + docFile.url;
+								return (
+									<MediaCard
+										key={docFile.id}
+										title={`Page Type: ${docFile.pageType}`}
+										subtitle={`Created By: ${docFile.createdBy}`}>
+										{docFile.pageType === 'VIDEO' ? (
+											<video
+												controls
+												className='mx-auto w-full max-w-[300px] rounded-xl object-cover'
+												src={fullUrl}
+												onError={() =>
+													console.error('Video failed to load:', fullUrl)
+												}>
+												Your browser does not support the video tag.
+											</video>
+										) : (
+											<HoverImage
+												id={docFile.id}
+												src={fullUrl}
+												alt={docFile.name || 'Document'}
+												hoveredCard={hoveredCard}
+												setHoveredCard={setHoveredCard}
+											/>
+										)}
+									</MediaCard>
+								);
+							})}
+						</div>
+					</PhotoProvider>
+				</section>
 			)}
 		</div>
 	);

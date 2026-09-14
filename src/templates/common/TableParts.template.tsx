@@ -68,12 +68,16 @@ export const TableHeaderTemplate: FC<ITableHeaderTemplateProps> = ({ table }) =>
 interface ITableBodyTemplateProps {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	table: TTableProps<any>;
+	onRowClick?: (row: any) => void;
 }
-export const TableBodyTemplate: FC<ITableBodyTemplateProps> = ({ table }) => {
+export const TableBodyTemplate: FC<ITableBodyTemplateProps> = ({ table, onRowClick }) => {
 	return (
 		<TBody>
 			{table.getRowModel().rows.map((row) => (
-				<Tr key={row.id}>
+				<Tr
+					key={row.id}
+					onClick={onRowClick ? () => onRowClick(row.original) : undefined}
+					className={onRowClick ? 'cursor-pointer' : undefined}>
 					{row.getVisibleCells().map((cell) => (
 						<Td
 							key={cell.id}
@@ -150,9 +154,10 @@ interface ITableTemplateProps extends Partial<ITableProps> {
 	table: TTableProps<any>;
 	hasHeader?: boolean;
 	hasFooter?: boolean;
+	onRowClick?: (row: any) => void;
 }
 const TableTemplate: FC<ITableTemplateProps> = (props) => {
-	const { children, hasHeader, hasFooter, table, ...rest } = props;
+	const { children, hasHeader, hasFooter, table, onRowClick, ...rest } = props;
 	const hasRows = table.getRowModel().rows.length > 0;
 	const columnCount = table.getAllColumns().length;  // Get the number of columns in the table
 	return (
@@ -162,7 +167,7 @@ const TableTemplate: FC<ITableTemplateProps> = (props) => {
 					<>
 						{hasHeader && <TableHeaderTemplate table={table}/>}
 						{hasRows ? (
-							<TableBodyTemplate table={table}/>
+							<TableBodyTemplate table={table} onRowClick={onRowClick}/>
 						) : (
 							// Render a single full-width row for the "No data found" message
 							<TBody>

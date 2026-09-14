@@ -21,6 +21,14 @@ import { Image } from '@heroui/image';
 const RECENT_SEARCHES_KEY = 'recent_customer_searches';
 const MAX_RECENT_SEARCHES = 5;
 
+const getContactLabel = (person: any) => {
+	const tel = person?.tel?.toString?.() ?? '';
+	if (!tel || tel === '0000000000') {
+		return person?.email || person?.customer?.email || '-';
+	}
+	return tel;
+};
+
 export default function SearchCustomer({
 	isApprove,
 	openSearch,
@@ -73,19 +81,20 @@ export default function SearchCustomer({
 	};
 
 	const handleNavigate = (value: any) => {
-		if (!value || !value.customer?.customerId) {
+		const customerId =
+			value?.customer?.customerId ?? value?.customerId ?? value?.customer?.id;
+		if (!value || !customerId) {
 			console.warn('Invalid navigation value:', value);
 			return;
 		}
-		console.log('Navigating to customer:', value);
 
 		// Save to recent searches
 		saveRecentSearch(value);
 
 		if (isApproveRoute) {
-			navigate(`/customer/approve/${value.customer.customerId}`, { state: value });
+			navigate(`/customer/approve/${customerId}`, { state: value });
 		} else {
-			navigate(`/customer/management/${value.customer.customerId}`, { state: value });
+			navigate(`/customer/management/${customerId}`, { state: value });
 		}
 
 		// Close dialog after navigation
@@ -219,7 +228,7 @@ export default function SearchCustomer({
 																{person?.lastNameLa}
 															</p>
 															<p className='text-xs text-gray-500 dark:text-gray-400'>
-																{person?.tel}
+																{getContactLabel(person)}
 															</p>
 														</div>
 													</div>
@@ -331,7 +340,7 @@ export default function SearchCustomer({
 															{activeOption.lastNameEn}
 														</h2>
 														<p className='text-sm/6 text-gray-500 dark:text-gray-400 '>
-															{activeOption.tel}
+															{getContactLabel(activeOption)}
 														</p>
 													</div>
 
@@ -361,7 +370,7 @@ export default function SearchCustomer({
 																ທີ່ຢູ່
 															</dt>
 															<dd className='truncate dark:text-gray-400'>
-																{`${activeOption.addresses[0]?.village}, ${activeOption.addresses[0]?.city}, ເເຂວງ ${activeOption.addresses[0]?.province}`}
+																{`${activeOption.addresses?.[0]?.village}, ${activeOption.addresses?.[0]?.city}, ເເຂວງ ${activeOption.addresses?.[0]?.province}`}
 															</dd>
 															<dt className='col-end-1 font-semibold text-gray-900 dark:text-gray-400'>
 																Email

@@ -29,3 +29,6 @@ yarn.lock
 # environment
 .env
 .env*
+
+# local https certificates
+certs

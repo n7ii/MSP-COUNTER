@@ -18,18 +18,18 @@ const Loading: FC<LoadingProps> = () => {
 
 	useEffect(() => {
 		// Simulate loading progress with a delay
-		let timer: NodeJS.Timeout;
+		const timers: ReturnType<typeof setTimeout>[] = [];
 		const simulateLoading = () => {
-			setTimeout(() => setProgress(30), 500); // 30% after 500ms
-			setTimeout(() => setProgress(60), 1000); // 60% after 1 second
-			setTimeout(() => setProgress(90), 1500); // 90% after 1.5 seconds
-			setTimeout(() => setProgress(100), 200000); // 100% after 2 seconds
+			timers.push(setTimeout(() => setProgress(30), 500)); // 30% after 500ms
+			timers.push(setTimeout(() => setProgress(60), 1000)); // 60% after 1 second
+			timers.push(setTimeout(() => setProgress(90), 1500)); // 90% after 1.5 seconds
+			timers.push(setTimeout(() => setProgress(100), 2000)); // 100% after 2 seconds
 		};
 		simulateLoading();
 
 		// Cleanup timeout on unmount
 		return () => {
-			clearTimeout(timer);
+			timers.forEach(clearTimeout);
 		};
 	}, []);
 

@@ -1,3 +1,4 @@
+// @ts-nocheck — react-simple-maps types incompatible with React 18 JSX
 import { useEffect, useMemo, useState } from 'react';
 import { csv } from 'd3-fetch';
 import sortBy from 'lodash/sortBy';

@@ -1,3 +1,4 @@
+// @ts-nocheck — react-simple-maps types incompatible with React 18 JSX
 import { Annotation, ComposableMap, Geographies, Geography } from 'react-simple-maps';
 import colors from 'tailwindcss/colors';
 import useDarkMode from '../../../../../hooks/useDarkMode';

@@ -16,52 +16,79 @@ import KycDoc from '@/pages/customer/approve/components/customerTabs/kycDoc.tsx'
 import Empty from '@/components/ui/Empty.tsx';
 import Container from '@/components/layouts/Container/Container.tsx';
 import ApproveOrReject from '@/pages/customer/approve/components/customerTabs/approveOrReject.tsx';
-import { Card, CardBody } from '@heroui/react';
+import { Button as HeroButton, Card, CardBody } from '@heroui/react';
 import DeviceDetail from '@/pages/customer/approve/components/customerTabs/deviceDetail.tsx';
 import Loading from '@/components/ui/spinner/fullPageSpinner.tsx';
 import UnlockAccount from '@/pages/customer/approve/components/customerTabs/unLockAccount.tsx';
+import { LuRefreshCw } from 'react-icons/lu';
 
 const ApproveDetailPage = () => {
 	const { id } = useParams();
 	const customerId = id;
 
-	const { data: userInfo, isLoading } = useGetCustomerByIdQuery({ customerId });
-
-	const profileId = userInfo?.body?.profileId;
-
-	console.log('profileId', profileId);
-
-	const { data: CustomerDoc, isLoading: isloadingDoc } = useGetCustomerDocsQuery(
+	const {
+		data: userInfo,
+		isLoading,
+		isError,
+		error,
+	} = useGetCustomerByIdQuery(
+		{ customerId },
 		{
-			id: profileId,
-		},
-		{
-			skip: !profileId,
+			skip: !customerId,
 		},
 	);
 
-	const isMephom = CustomerDoc?.body?.useMeepom;
+	const {
+		data: CustomerDoc,
+		isLoading: isloadingDoc,
+		isFetching: isFetchingDoc,
+		refetch: refetchDocs,
+	} = useGetCustomerDocsQuery(
+		{
+			id: customerId,
+		},
+		{
+			skip: !customerId,
+		},
+	);
 
-	// Determine which documents to use
-	const documents =
-		userInfo?.documents && !isMephom && userInfo?.documents?.length > 0
-			? userInfo.documents[0]
-			: CustomerDoc?.body?.msp && !isMephom
-				? CustomerDoc?.body?.msp
-				: isMephom && CustomerDoc?.body?.meepom
-					? CustomerDoc?.body?.meepom
-					: [];
+	const docBody = CustomerDoc?.body;
+	const isMephom = Boolean(docBody?.useMeepom);
+	const mspDoc = docBody?.msp;
+	const meepomDoc = docBody?.meepom;
+
+	const hasMspDocs = Array.isArray(mspDoc?.docFiles) && mspDoc.docFiles.length > 0;
+	const hasMeepomDocs = Boolean(
+		meepomDoc &&
+			(meepomDoc.shortVideo ||
+				meepomDoc.rfDocPhoto1 ||
+				meepomDoc.rfDocPhoto2 ||
+				meepomDoc.profilePhoto),
+	);
+	const hasAnyDocs = hasMspDocs || hasMeepomDocs;
+	const isAlreadyVerified = userInfo?.body?.customer?.vfDoc === true;
+
+	const handleReloadDocs = () => {
+		if (!customerId) return;
+		refetchDocs();
+	};
+
+	if (!customerId) {
+		return <Empty text='Missing customer id' />;
+	}
 
 	if (isLoading) {
 		return <Loading />;
 	}
-	// Early return if no userInfo is available
-	if (!userInfo)
+
+	if (isError || !userInfo?.body) {
+		console.error('Failed to load customer detail', error);
 		return (
 			<div>
 				<Empty text='No customer data available' />
 			</div>
 		);
+	}
 
 	const tabs = [
 		{
@@ -71,7 +98,7 @@ const ApproveDetailPage = () => {
 					<span>ເອກະສານ</span>
 				</div>
 			),
-			content: <KycDoc isMeepom={isMephom} content={documents} />,
+			content: <KycDoc isMeepom={isMephom} msp={mspDoc} meepom={meepomDoc} />,
 		},
 		{
 			key: 'device',
@@ -82,25 +109,15 @@ const ApproveDetailPage = () => {
 			),
 			content: <DeviceDetail customerId={customerId} />,
 		},
-		// {
-		// 	key: 'approve',
-		// 	title: (
-		// 		<div className='text-md flex items-center space-x-2 font-semibold'>
-		// 			<span>ການອະນຸມັດ</span>
-		// 		</div>
-		// 	),
-		// 	content: <KycDoc content={documents} />,
-		// },
 	];
 
 	return (
 		<>
 			{isloadingDoc && <Loading />}
-			{isLoading && <Loading />}
 			<PageWrapper name='page'>
 				<Subheader>
 					<SubheaderLeft>
-						<Link to={`../${appPages.customerPage.subPages.customerApprove.to}`}>
+						<Link to={appPages.customerPage.subPages.customerApprove.to}>
 							<Button icon='HeroArrowLeft' className='!px-0'>
 								ກັບຄືນ
 							</Button>
@@ -109,20 +126,40 @@ const ApproveDetailPage = () => {
 						ອະນຸມັດລູກຄ້າ (KYC)
 					</SubheaderLeft>
 				</Subheader>
-				<UnlockAccount username={userInfo?.body?.customer?.username} />
-				<CustomerInfo userInfo={userInfo.body} />
+				{userInfo.body.customer?.username ? (
+					<UnlockAccount username={userInfo.body.customer.username} />
+				) : null}
+				<CustomerInfo
+					userInfo={userInfo.body}
+					isMephom={isMephom}
+					CustomerDoc={CustomerDoc}
+				/>
 				<Container>
 					<div className='px-16 py-4 pt-12'>
+						<div className='mb-4 flex justify-end'>
+							<HeroButton
+								color='primary'
+								variant='flat'
+								radius='sm'
+								size='sm'
+								isLoading={isFetchingDoc}
+								isDisabled={!customerId}
+								startContent={
+									!isFetchingDoc ? (
+										<LuRefreshCw className='h-4 w-4' />
+									) : undefined
+								}
+								onPress={handleReloadDocs}>
+								Reload Docs
+							</HeroButton>
+						</div>
 						<CustomerTabs variants='underlined' tabs={tabs} />
-						{documents?.docFiles?.length > 0 &&
-						userInfo?.body?.customer?.vfDoc !== true ? ( // Show if vfDoc is not true
-							<>
-								<ApproveOrReject customerId={id} />
-							</>
+
+						{hasAnyDocs && !isAlreadyVerified ? (
+							<ApproveOrReject customerId={id} />
 						) : null}
 
-						{documents?.docFiles?.length === 0 &&
-						userInfo?.body?.customer?.vfDoc !== true ? (
+						{!isloadingDoc && !hasAnyDocs && !isAlreadyVerified ? (
 							<Card>
 								<CardBody className='flex items-center justify-between overflow-visible'>
 									<Empty text='ຍັງບໍ່ມີຂໍ້ມູນເອກະສານ' />
@@ -130,16 +167,6 @@ const ApproveDetailPage = () => {
 							</Card>
 						) : null}
 					</div>
-					{/*no doc submit*/}
-					{(!documents || documents.length === 0) &&
-						CustomerDoc?.meepom == null &&
-						CustomerDoc?.msp == null && (
-							<>
-								<div>
-									<Empty text='ຍັງບໍ່ມີການ ຍຶນຍັນຕົວຕົນ' />
-								</div>
-							</>
-						)}
 				</Container>
 			</PageWrapper>
 		</>

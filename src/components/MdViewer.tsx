@@ -1,11 +1,14 @@
-import { FC, useState } from 'react';
-import { Prism } from 'react-syntax-highlighter';
+import { FC, useState, ComponentType } from 'react';
+import { Prism as PrismHighlighter } from 'react-syntax-highlighter';
 import { oneDark, oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import ReactMarkdown, { Options } from 'react-markdown';
 import classNames from 'classnames';
 import useDarkMode from '../hooks/useDarkMode';
 import Button from './ui/Button';
 import useMdToString from '../hooks/useMdToString';
+
+// react-syntax-highlighter types are incompatible with React 18 JSX typings
+const Prism = PrismHighlighter as unknown as ComponentType<any>;
 
 interface IMdViewerProps extends Partial<Options> {
 	mdFile: RequestInfo | URL;

@@ -31,18 +31,8 @@ const CustomerInfoManage = ({ userInfo }: any) => {
 	const [selectedCustomerType, setSelectedCustomerType] = useState<string>('');
 
 	const isMephom = CustomerDoc?.body?.useMeepom;
-
-	// Determine which documents to use
-	const documents =
-		userInfo?.documents && !isMephom && userInfo?.documents?.length > 0
-			? userInfo.documents[0]
-			: CustomerDoc?.body?.docFiles && !isMephom && CustomerDoc?.body?.docFiles?.length > 0
-				? CustomerDoc.body.msp
-				: isMephom
-					? CustomerDoc.body.meepom
-					: [];
-
-	console.log('userInfo', userInfo);
+	const mspDoc = CustomerDoc?.body?.msp || userInfo?.documents?.[0];
+	const meepomDoc = CustomerDoc?.body?.meepom;
 
 	// Set initial customer type value
 	useEffect(() => {
@@ -308,7 +298,7 @@ const CustomerInfoManage = ({ userInfo }: any) => {
 					<label htmlFor='documents' className='mb-2 block'>
 						ໄຟລ໌ເອກະສານ
 					</label>
-					<KycDoc content={documents} isMeepom={isMephom} />
+					<KycDoc msp={mspDoc} meepom={meepomDoc} isMeepom={isMephom} />
 				</div>
 
 				{/* Submit Button */}

@@ -44,7 +44,12 @@ const CustomerApprovePage = () => {
 	});
 
 	const handleNavigate = (value: any) => {
-		navigate(`/customer/approve/${value.customer.customerId}`, { state: value });
+		const customerId = value?.customer?.customerId ?? value?.customerId;
+		if (!customerId) {
+			console.warn('Missing customerId on row', value);
+			return;
+		}
+		navigate(`/customer/approve/${customerId}`, { state: value });
 	};
 	useEffect(() => {
 		if (refetchInterval !== null) {
@@ -65,103 +70,58 @@ const CustomerApprovePage = () => {
 		columnHelper.accessor((row) => `${row.firstNameLa} ${row.lastNameLa}`, {
 			id: 'fullNameLa',
 			header: 'Full Name (La)',
-			cell: (info) => (
-				<div
-					onClick={() => handleNavigate(info.row.original)}
-					className='cursor-pointer font-bold'>
-					{info.getValue()}
-				</div>
-			),
+			cell: (info) => <div className='font-bold'>{info.getValue()}</div>,
 		}),
 
 		columnHelper.accessor((row) => `${row.firstNameEn} ${row.lastNameEn}`, {
 			id: 'fullNameEn',
 			header: 'Full Name (En)',
-			cell: (info) => (
-				<div
-					onClick={() => handleNavigate(info.row.original)}
-					className='cursor-pointer font-bold'>
-					{info.getValue()}
-				</div>
-			),
+			cell: (info) => <div className='font-bold'>{info.getValue()}</div>,
 		}),
 
 		columnHelper.accessor('genderLa', {
 			header: 'Gender (La)',
-			cell: (info) => (
-				<div>
-					<div
-						onClick={() => handleNavigate(info.row.original)}
-						className='cursor-pointer '>
-						{info.getValue()}
-					</div>
-				</div>
-			),
+			cell: (info) => <div>{info.getValue()}</div>,
 		}),
 
 		columnHelper.accessor('birthday', {
 			header: 'Birthday',
-			cell: (info) => (
-				<div>
-					<div
-						onClick={() => handleNavigate(info.row.original)}
-						className='cursor-pointer '>
-						{info.getValue()}
-					</div>
-				</div>
-			),
+			cell: (info) => <div>{info.getValue()}</div>,
 		}),
 
 		columnHelper.accessor('tel', {
 			header: 'Tel',
-			cell: (info) => (
-				<div>
-					<div
-						onClick={() => handleNavigate(info.row.original)}
-						className='cursor-pointer '>
-						{info.getValue()}
-					</div>
-				</div>
-			),
+			cell: (info) => <div>{info.getValue()}</div>,
 		}),
 
 		columnHelper.accessor(
-			(row) =>
-				`${row.addresses[0]?.village}, ${row.addresses[0]?.city}, ເເຂວງ ${row.addresses[0]?.province}`,
+			(row) => {
+				const address = row.addresses?.[0];
+				if (!address) return '-';
+				return `${address.village ?? ''}, ${address.city ?? ''}, ເເຂວງ ${address.province ?? ''}`;
+			},
 			{
 				id: 'address',
 				header: 'Address',
-				cell: (info) => (
-					<div>
-						<div
-							onClick={() => handleNavigate(info.row.original)}
-							className='cursor-pointer '>
-							{info.getValue()}
-						</div>
-					</div>
-				),
+				cell: (info) => <div>{info.getValue()}</div>,
 			},
 		),
 
-		columnHelper.accessor('customer.customer.locked', {
+		columnHelper.accessor((row) => row.customer?.locked, {
+			id: 'locked',
 			header: 'Status',
-			cell: (info) => (
-				<div>
+			cell: (info) => {
+				const locked = Boolean(info.getValue());
+				return (
 					<Chip
 						size='lg'
-						color={info.getValue()?.customer?.locked ? 'danger' : 'primary'}
-						startContent={
-							info.getValue()?.customer?.locked ? (
-								<FaLock size={14} />
-							) : (
-								<FaUnlock size={14} />
-							)
-						}
+						color={locked ? 'danger' : 'primary'}
+						startContent={locked ? <FaLock size={14} /> : <FaUnlock size={14} />}
 						variant='bordered'>
-						{info.getValue()?.customer?.locked ? 'Locked' : 'Unlocked'}
+						{locked ? 'Locked' : 'Unlocked'}
 					</Chip>
-				</div>
-			),
+				);
+			},
 		}),
 	];
 
@@ -273,7 +233,11 @@ const CustomerApprovePage = () => {
 						{/*    </CardHeaderChild>*/}
 						{/*</CardHeader>*/}
 						<CardBody>
-							<TableTemplate table={table} className='table-fixed' />
+							<TableTemplate
+								table={table}
+								className='table-fixed'
+								onRowClick={handleNavigate}
+							/>
 						</CardBody>
 						<TableCardFooterTemplate
 							table={table}

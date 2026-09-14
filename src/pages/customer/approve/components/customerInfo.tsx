@@ -15,7 +15,9 @@ const CustomerInfo = ({ userInfo, isMephom, CustomerDoc }: any) => {
 		? import.meta.env.VITE_IMAGE_MEPHOM_URL
 		: import.meta.env.VITE_IMAGE_URL;
 
-	const profileImage = isMephom ? CustomerDoc?.body?.meepom[0]?.profilePhoto : userInfo?.profImg;
+	const profileImage = isMephom
+		? CustomerDoc?.body?.meepom?.profilePhoto || CustomerDoc?.body?.meepom?.[0]?.profilePhoto
+		: userInfo?.profImg;
 	const isUnlocked = userInfo?.customer?.locked === false && userInfo?.customer?.status === true;
 	return (
 		<div className='bg-gray-100  dark:bg-[#09090B]'>

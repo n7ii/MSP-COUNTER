@@ -1,0 +1,9 @@
+# Ignore everything except what the image needs
+*
+
+# Keep build output + nginx config
+!dist
+!dist/**
+!nginx.conf
+!Dockerfile
+!Docker.md

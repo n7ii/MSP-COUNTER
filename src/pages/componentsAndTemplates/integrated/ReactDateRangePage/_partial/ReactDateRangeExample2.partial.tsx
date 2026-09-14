@@ -1,3 +1,4 @@
+// @ts-nocheck — react-date-range types incompatible with React 18 JSX
 import { useState } from 'react';
 import { DateRangePicker, RangeKeyDict } from 'react-date-range';
 import dayjs from 'dayjs';
