@@ -75,6 +75,9 @@ const DefaultAsideTemplate = () => {
 					{hasAccess(userRole, appPages.revertTransactionPage.roles) && (
 						<NavItem {...appPages.revertTransactionPage}></NavItem>
 					)}
+					{hasAccess(userRole, appPages.salaryPage.roles) && (
+						<NavItem {...appPages.salaryPage}></NavItem>
+					)}
 					{hasAccess(userRole, appPages.usersPage.roles) &&
 						hasAccessToSubPages(appPages.usersPage.subPages) && (
 							<NavCollapse

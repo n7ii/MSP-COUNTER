@@ -12,6 +12,7 @@ export default defineConfig(({ mode }) => {
 	return {
 		plugins: [react(), EnvironmentPlugin({})],
 		server: {
+			host: true,
 			proxy: apiTarget
 				? {
 						'/api': {

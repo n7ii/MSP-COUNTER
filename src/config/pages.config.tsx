@@ -11,6 +11,7 @@ import {
 	LuWalletCards,
 	LuFileText,
 	LuBanknote,
+	LuHandCoins,
 	LuListChecks,
 	LuCreditCard,
 	LuUsers,
@@ -115,6 +116,13 @@ export const appPages = {
 		text: 'ຈັດການການຄຶນເງິນ',
 		icon: <LuUndo2 size='24' className='text-gray-400' />,
 		roles: ['ADMIN', 'ROOT', 'RECONSILE'],
+	},
+	salaryPage: {
+		id: 'salaryPage',
+		to: '/salary',
+		text: 'ນຳເຂົ້າເງິນເດືອນ',
+		icon: <LuHandCoins size='24' className='text-gray-400' />,
+		roles: ['ADMIN', 'ROOT'],
 	},
 	usersPage: {
 		id: 'user',
