@@ -41,6 +41,7 @@ const ReconcilePage = () => {
 		reconsider,
 		ddAccountDetail,
 		customerDetail,
+		salaryDetail,
 		// masterMaxLimit,
 	} = reconcileData || {};
 
@@ -523,11 +524,33 @@ const ReconcilePage = () => {
 										</p>
 									</div>
 
+									{salaryDetail && (
+										<div className='rounded-lg border-2 border-teal-200 bg-gradient-to-br from-teal-50 to-emerald-50 p-5 shadow-md dark:border-teal-700 dark:from-teal-900/30 dark:to-emerald-900/30'>
+											<div className='mb-3 flex items-center gap-3'>
+												<div className='flex h-12 w-12 items-center justify-center rounded-full bg-teal-500 text-white shadow-lg dark:bg-teal-600'>
+													<FaWallet className='text-xl' />
+												</div>
+												<p className='text-sm font-bold uppercase tracking-wide text-teal-800 dark:text-teal-200'>
+													ບັນຊີເງິນເດືອນ (Salary) ({salaryDetail?.acctNo})
+												</p>
+											</div>
+											<p className='text-4xl font-extrabold text-teal-700 dark:text-teal-300'>
+												{salaryDetail?.balance?.toLocaleString()}{' '}
+												{salaryDetail?.ccy || ddAccountDetail?.acctCcy}
+											</p>
+											<p className='mt-2 text-xs text-teal-600 dark:text-teal-400'>
+												{salaryDetail?.acctName}
+											</p>
+										</div>
+									)}
+
 									{/* Difference Comparison */}
 									{(() => {
-										const currentBalance = ddAccountDetail?.currBalance || 0;
+										const currentBalance = ddAccountDetail?.avlBalance || 0;
 										const trackingBalance = customerDetail?.sumBalance || 0;
-										const difference = currentBalance - trackingBalance;
+										const salaryBalance = salaryDetail?.balance || 0;
+										const difference =
+											currentBalance - trackingBalance - salaryBalance;
 										const isBalanced = Math.abs(difference) < 0.01;
 										const isPositive = difference > 0;
 
@@ -602,7 +625,8 @@ const ReconcilePage = () => {
 																: 'text-orange-700 dark:text-orange-300'
 														}`}>
 														= {currentBalance.toLocaleString()} -{' '}
-														{trackingBalance.toLocaleString()}
+														{trackingBalance.toLocaleString()} -{' '}
+														{salaryBalance.toLocaleString()}
 													</p>
 												</div>
 											</div>
