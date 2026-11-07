@@ -8,6 +8,7 @@ import { ThemeContextProvider } from './context/themeContext';
 import App from './App.tsx';
 import { Provider } from 'react-redux';
 import { store } from '@/redux/store';
+import { APP_BASE_PATH } from '@/config/app.config.ts';
 import './i18n';
 import './styles/index.css';
 
@@ -20,7 +21,7 @@ root.render(
 	<StrictMode>
 		<ThemeContextProvider>
 			<Provider store={store}>
-				<BrowserRouter>
+				<BrowserRouter basename={APP_BASE_PATH}>
 					<App />
 				</BrowserRouter>
 			</Provider>

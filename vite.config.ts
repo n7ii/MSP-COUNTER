@@ -10,6 +10,7 @@ export default defineConfig(({ mode }) => {
 	const isDockerBuild = process.env.DOCKER_BUILD === '1';
 
 	return {
+		base: '/msp/',
 		plugins: [react(), EnvironmentPlugin({})],
 		server: {
 			host: true,

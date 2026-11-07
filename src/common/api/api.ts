@@ -35,7 +35,7 @@ instance.interceptors.response.use(
 			tokenService.removeTokens();
 			await alertService.error('Session ໝົດອາຍຸ, ກະລຸນາເຂົາລະບົບໃໝ່');
 			// Redirect to login page
-			window.location.href = '/auth'; // or your login route
+			window.location.href = `${import.meta.env.BASE_URL}auth`;
 		}
 
 		return response;
@@ -46,7 +46,7 @@ instance.interceptors.response.use(
 			tokenService.removeTokens();
 			await alertService.error('Session ໝົດອາຍຸ, ກະລຸນາເຂົາລະບົບໃໝ່');
 			// Redirect to login page
-			window.location.href = '/auth'; // or your login route
+			window.location.href = `${import.meta.env.BASE_URL}auth`;
 			return Promise.reject(error); // Still reject to stop further processing
 		} else {
 			const ex = getExceptionPayload(error);

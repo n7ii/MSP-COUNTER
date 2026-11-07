@@ -32,7 +32,7 @@ const ContentRouter = () => {
 		return <Loading />;
 	}
 	// Redirect authenticated users to the home page if they are trying to access the login route
-	if (isAuthenticated && window.location.pathname === '/auth') {
+	if (isAuthenticated && location.pathname === '/auth') {
 		return <Navigate to='/' replace />;
 	}
 

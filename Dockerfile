@@ -3,7 +3,7 @@ FROM nginx:alpine
 WORKDIR /app
 ENV TZ=Asia/Vientiane
 
-COPY dist /usr/share/nginx/html
+COPY dist /usr/share/nginx/html/msp
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
