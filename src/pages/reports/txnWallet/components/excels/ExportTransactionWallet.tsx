@@ -222,3 +222,73 @@ export const exportToExcel = (data: any[], fileName: string) => {
 		exportTransactionWalletToExcel(data, fileName);
 	}
 };
+
+export const exportTxnWalletDetailToExcel = (
+	data: any[],
+	fileName: string = 'Transaction_Wallet_Detail',
+) => {
+	if (!data || !data.length) {
+		toast.error('No data available for export.');
+		return;
+	}
+
+	try {
+		const formattedData = data.map((item: any, index: number) => ({
+			NO: index + 1,
+			ID: item.id ?? '',
+			'Created By': item.createdBy ?? '',
+			'Last Modified By': item.lastModifiedBy ?? '',
+			DTRQ: item.dtrq ?? '',
+			'RF No': item.rfNo ?? '',
+			'Receipt No': item.receiptNo ?? '',
+			Customer: item.customer ?? '',
+			Channel: item.channel ?? '',
+			'From Member': item.fromMember ?? '',
+			'To Member': item.toMember ?? '',
+			'Wallet No': item.wlNo ?? '',
+			'From Wallet No': item.fwlNo ?? '',
+			'From Wallet Name': item.fwlName ?? '',
+			'From CCY': item.fccy ?? '',
+			'From Tel': item.ftel ?? '',
+			'To Wallet No': item.twlNo ?? '',
+			'To Wallet Name': item.twlName ?? '',
+			'To CCY': item.tccy ?? '',
+			'To Tel': item.ttel ?? '',
+			'TX No': item.txNo ?? '',
+			'Txn Date': item.txnDate ?? '',
+			'Bis Date': item.bisDate ?? '',
+			Debit: item.debit ?? 0,
+			Credit: item.credit ?? 0,
+			Amount: item.amount ?? 0,
+			CCY: item.ccy ?? '',
+			'Before TXN': item.beforeTXN ?? 0,
+			'After TXN': item.afterTXN ?? 0,
+			Fee: item.fee ?? 0,
+			'Fee CCY': item.feeCcy ?? '',
+			Rate: item.rate ?? '',
+			'Rate CCY': item.rateCcy ?? '',
+			'DR/CR Type': item.drcrgType ?? '',
+			'DP/WD Type': item.dpwdType ?? '',
+			'STM Type': item.stmType ?? '',
+			Remark: item.remark ?? '',
+			Status: item.status === true || item.status === false ? String(item.status) : (item.status ?? ''),
+			'TX Status': item.txstatus ?? '',
+			Circ: item.circ ?? '',
+			'Atvt Acct': item.atvtacct ?? '',
+			Func: item.func ?? '',
+		}));
+
+		const worksheet = XLSX.utils.json_to_sheet(formattedData);
+		worksheet['!cols'] = Object.keys(formattedData[0]).map((key) => ({
+			wch: Math.min(Math.max(key.length + 2, 12), 35),
+		}));
+
+		const workbook = XLSX.utils.book_new();
+		XLSX.utils.book_append_sheet(workbook, worksheet, 'Detail');
+		XLSX.writeFile(workbook, `${fileName}.xlsx`);
+		toast.success(`Exported ${formattedData.length} detail records successfully.`);
+	} catch (error) {
+		console.error('Error exporting detail to Excel:', error);
+		toast.error('Failed to export detail data to Excel.');
+	}
+};

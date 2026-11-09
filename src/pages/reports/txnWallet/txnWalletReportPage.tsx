@@ -25,7 +25,10 @@ import {
 import { Range } from 'react-date-range';
 import dayjs from 'dayjs';
 
-import { useGetTxnWalletReportQuery } from '@/pages/reports/redux/queries/txnWalletApiSlice.ts';
+import {
+	useGetTxnWalletReportQuery,
+	useGetTxnWalletReportDetailMutation,
+} from '@/pages/reports/redux/queries/txnWalletApiSlice.ts';
 
 import ModalProvider from '@/components/ui/modal/modalProvider.tsx';
 
@@ -42,9 +45,11 @@ import {
 import { PiMicrosoftExcelLogoFill } from 'react-icons/pi';
 import { AiOutlineFilePdf } from 'react-icons/ai';
 import { HiChevronDown } from 'react-icons/hi';
+import { LuEye } from 'react-icons/lu';
 import PDFGenerator from '@/pages/reports/components/statementPDFAll.tsx';
 import { useGetAcctListQuery } from '@/redux/queries/dashBroadApiSlice.ts';
 import { useExcelExport } from '@/pages/reports/txnWallet/utils/exportUtils.tsx';
+import { exportTxnWalletDetailToExcel } from '@/pages/reports/txnWallet/components/excels/ExportTransactionWallet.tsx';
 
 // Constants
 const INITIAL_PAGE_SIZE = 10;
@@ -90,15 +95,19 @@ const TxnWalletReportPage = () => {
 	const [pageIndex, setPageIndex] = useState(0);
 	const [pageSize, setPageSize] = useState(INITIAL_PAGE_SIZE);
 	const [isOpen, setIsOpen] = useState<boolean>(false);
+	const [detailRows, setDetailRows] = useState<any[]>([]);
+	const [detailRefNo, setDetailRefNo] = useState<string>('');
 	const [walletNo] = useState('2131171001');
 	const [searchTriggered] = useState(true);
 	const [selectedStmType, setSelectedStmType] = useState<string>('ALL');
 	const [selectedChannel, setSelectedChannel] = useState<string>('ALL');
+	const [getTxnWalletReportDetail, { isLoading: isDetailLoading }] =
+		useGetTxnWalletReportDetailMutation();
 
 	const [state, setState] = useState<Range[]>([
 		{
-			startDate: dayjs().startOf('month').startOf('day').toDate(),
-			endDate: dayjs().endOf('month').endOf('day').toDate(),
+			startDate: dayjs().startOf('day').toDate(),
+			endDate: dayjs().endOf('day').toDate(),
 			key: 'selection',
 		},
 	]);
@@ -157,6 +166,66 @@ const TxnWalletReportPage = () => {
 		new Set(fetchedData?.body?.content?.map((item: any) => item.channel).filter(Boolean)),
 	).sort();
 
+	const handleOpenDetail = async (row: any) => {
+		const refNo = row?.rfNo || row?.receiptNo || row?.txNo;
+		if (!refNo) {
+			toast.error('Reference number not found.');
+			return;
+		}
+
+		try {
+			setDetailRefNo(refNo);
+			setDetailRows([]);
+			setIsOpen(true);
+			const res = await getTxnWalletReportDetail({ refNo }).unwrap();
+			const rows = Array.isArray(res?.body) ? res.body : [];
+			setDetailRows(rows);
+			if (!rows.length) {
+				toast.error('No detail found.');
+			}
+		} catch (error) {
+			console.error('Error fetching txn wallet detail:', error);
+			toast.error('Failed to load transaction detail.');
+			setIsOpen(false);
+		}
+	};
+
+	const handleExportDetailExcel = () => {
+		if (!detailRows.length) {
+			toast.error('No detail data available for export.');
+			return;
+		}
+		exportTxnWalletDetailToExcel(
+			detailRows,
+			`Transaction_Wallet_Detail_${detailRefNo || dayjs().format('YYYYMMDD_HHmmss')}`,
+		);
+	};
+
+	const formatAmount = (value: any) => {
+		const num = Number(value);
+		return Number.isFinite(num) ? num.toLocaleString() : value ?? '-';
+	};
+
+	const detailSummary = detailRows.reduce(
+		(acc, row) => {
+			acc.totalDebit += Number(row.debit) || 0;
+			acc.totalCredit += Number(row.credit) || 0;
+			acc.totalAmount += Number(row.amount) || 0;
+			acc.totalFee += Number(row.fee) || 0;
+			if (row.circ === 'I') acc.inCount += 1;
+			if (row.circ === 'O') acc.outCount += 1;
+			return acc;
+		},
+		{
+			totalDebit: 0,
+			totalCredit: 0,
+			totalAmount: 0,
+			totalFee: 0,
+			inCount: 0,
+			outCount: 0,
+		},
+	);
+
 	// Columns for the table
 	const columnHelper = createColumnHelper<any>();
 	const columns = [
@@ -197,6 +266,20 @@ const TxnWalletReportPage = () => {
 		columnHelper.accessor('afterTXN', {
 			header: 'Balance',
 			cell: (info) => info.getValue().toLocaleString(),
+		}),
+		columnHelper.display({
+			id: 'actions',
+			header: 'Detail',
+			cell: (info) => (
+				<Button
+					isIconOnly
+					size='sm'
+					color='default'
+					variant='faded'
+					onPress={() => handleOpenDetail(info.row.original)}>
+					<LuEye size={18} />
+				</Button>
+			),
 		}),
 	];
 
@@ -334,13 +417,149 @@ const TxnWalletReportPage = () => {
 		<>
 			<ModalProvider
 				isOpen={isOpen}
-				onOpenChange={() => setIsOpen(false)}
-				title='ລາຍລະອຽດ'
-				scrollBehavior='outside'
-				size='3xl'>
-				<div className='py-4'></div>
+				onOpenChange={() => {
+					setIsOpen(false);
+					setDetailRows([]);
+					setDetailRefNo('');
+				}}
+				title={`ລາຍລະອຽດ${detailRefNo ? ` · ${detailRefNo}` : ''}`}
+				scrollBehavior='inside'
+				size='full'>
+				<div className='space-y-4 py-2'>
+					<div className='flex flex-wrap items-center justify-between gap-3'>
+						<p className='text-sm text-gray-600'>
+							{detailRows.length} record{detailRows.length === 1 ? '' : 's'}
+						</p>
+						<Button
+							color='primary'
+							radius='sm'
+							variant='ghost'
+							startContent={<PiMicrosoftExcelLogoFill size={18} />}
+							isDisabled={!detailRows.length || isDetailLoading}
+							onPress={handleExportDetailExcel}>
+							Download Excel
+						</Button>
+					</div>
+
+					{!isDetailLoading && detailRows.length > 0 && (
+						<div className='grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6'>
+							<div className='rounded-md border bg-gray-50 px-3 py-2'>
+								<p className='text-xs text-gray-500'>Records</p>
+								<p className='text-base font-semibold'>{detailRows.length}</p>
+							</div>
+							<div className='rounded-md border bg-gray-50 px-3 py-2'>
+								<p className='text-xs text-gray-500'>Total Debit</p>
+								<p className='text-base font-semibold text-red-600'>
+									{formatAmount(detailSummary.totalDebit)}
+								</p>
+							</div>
+							<div className='rounded-md border bg-gray-50 px-3 py-2'>
+								<p className='text-xs text-gray-500'>Total Credit</p>
+								<p className='text-base font-semibold text-emerald-600'>
+									{formatAmount(detailSummary.totalCredit)}
+								</p>
+							</div>
+							<div className='rounded-md border bg-gray-50 px-3 py-2'>
+								<p className='text-xs text-gray-500'>Total Amount</p>
+								<p className='text-base font-semibold'>
+									{formatAmount(detailSummary.totalAmount)}
+								</p>
+							</div>
+							<div className='rounded-md border bg-gray-50 px-3 py-2'>
+								<p className='text-xs text-gray-500'>Total Fee</p>
+								<p className='text-base font-semibold'>
+									{formatAmount(detailSummary.totalFee)}
+								</p>
+							</div>
+							<div className='rounded-md border bg-gray-50 px-3 py-2'>
+								<p className='text-xs text-gray-500'>Circ (I / O)</p>
+								<p className='text-base font-semibold'>
+									{detailSummary.inCount} / {detailSummary.outCount}
+								</p>
+							</div>
+						</div>
+					)}
+
+					{isDetailLoading ? (
+						<div className='flex min-h-[200px] items-center justify-center text-sm text-gray-500'>
+							Loading detail...
+						</div>
+					) : detailRows.length === 0 ? (
+						<div className='flex min-h-[200px] items-center justify-center text-sm text-gray-500'>
+							No detail data
+						</div>
+					) : (
+						<div className='max-h-[70vh] w-full overflow-auto rounded-md border'>
+							<table className='min-w-full w-full border-collapse text-left text-[13px]'>
+								<thead className='sticky top-0 bg-gray-100'>
+									<tr>
+										<th className='border-b px-3 py-2'>NO</th>
+										<th className='border-b px-3 py-2'>Txn Date</th>
+										<th className='border-b px-3 py-2'>RF No</th>
+										<th className='border-b px-3 py-2'>Channel</th>
+										<th className='border-b px-3 py-2'>From Member</th>
+										<th className='border-b px-3 py-2'>To Member</th>
+										<th className='border-b px-3 py-2'>Wallet No</th>
+										<th className='border-b px-3 py-2'>From Wallet</th>
+										<th className='border-b px-3 py-2 min-w-[280px]'>From Name</th>
+										<th className='border-b px-3 py-2'>To Name</th>
+										<th className='border-b px-3 py-2'>To Tel</th>
+										<th className='border-b px-3 py-2'>TX No</th>
+										<th className='border-b px-3 py-2'>Debit</th>
+										<th className='border-b px-3 py-2'>Credit</th>
+										<th className='border-b px-3 py-2'>Amount</th>
+										<th className='border-b px-3 py-2'>Before</th>
+										<th className='border-b px-3 py-2'>After</th>
+										<th className='border-b px-3 py-2'>Fee</th>
+										<th className='border-b px-3 py-2'>Circ</th>
+										<th className='border-b px-3 py-2'>Created By</th>
+										<th className='border-b px-3 py-2'>Remark</th>
+									</tr>
+								</thead>
+								<tbody>
+									{detailRows.map((row, index) => (
+										<tr key={row.id ?? `${row.rfNo}-${index}`} className='odd:bg-white even:bg-gray-50'>
+											<td className='border-b px-3 py-2'>{index + 1}</td>
+											<td className='border-b px-3 py-2 whitespace-nowrap'>{row.txnDate ?? row.dtrq ?? '-'}</td>
+											<td className='border-b px-3 py-2'>{row.rfNo ?? '-'}</td>
+											<td className='border-b px-3 py-2'>{row.channel ?? '-'}</td>
+											<td className='border-b px-3 py-2'>{row.fromMember ?? '-'}</td>
+											<td className='border-b px-3 py-2'>{row.toMember ?? '-'}</td>
+											<td className='border-b px-3 py-2'>{row.wlNo ?? '-'}</td>
+											<td className='border-b px-3 py-2'>{row.fwlNo ?? '-'}</td>
+											<td className='border-b px-3 py-2 min-w-[280px] whitespace-normal'>{row.fwlName ?? '-'}</td>
+											<td className='border-b px-3 py-2'>{row.twlName ?? '-'}</td>
+											<td className='border-b px-3 py-2'>{row.ttel ?? '-'}</td>
+											<td className='border-b px-3 py-2'>{row.txNo ?? '-'}</td>
+											<td className='border-b px-3 py-2 text-right'>{formatAmount(row.debit)}</td>
+											<td className='border-b px-3 py-2 text-right'>{formatAmount(row.credit)}</td>
+											<td className='border-b px-3 py-2 text-right'>{formatAmount(row.amount)}</td>
+											<td className='border-b px-3 py-2 text-right'>{formatAmount(row.beforeTXN)}</td>
+											<td className='border-b px-3 py-2 text-right'>{formatAmount(row.afterTXN)}</td>
+											<td className='border-b px-3 py-2 text-right'>{formatAmount(row.fee)}</td>
+											<td
+												className={`border-b px-3 py-2 font-semibold ${
+													row.circ === 'I'
+														? 'text-emerald-600'
+														: row.circ === 'O'
+															? 'text-red-600'
+															: ''
+												}`}>
+												{row.circ ?? '-'}
+											</td>
+											<td className='border-b px-3 py-2'>{row.createdBy ?? '-'}</td>
+											<td className='border-b px-3 py-2 max-w-xs whitespace-pre-wrap break-words'>
+												{row.remark ?? '-'}
+											</td>
+										</tr>
+									))}
+								</tbody>
+							</table>
+						</div>
+					)}
+				</div>
 			</ModalProvider>
-			{(isLoading || isExporting) && <Loading />}
+			{(isLoading || isExporting || isDetailLoading) && <Loading />}
 			<PageWrapper name='Txn Wallet'>
 				<Subheader>
 					<SubheaderLeft>

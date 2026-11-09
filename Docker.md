@@ -21,8 +21,8 @@ docker build --platform linux/amd64 -t apb.registry-img.com/app/msp-counter:v1.0
 docker push apb.registry-img.com/app/msp-counter:v1.0.50
 
 # UAT
-docker build --platform linux/amd64 -t apb.registry-img.com/app-uat/msp-counter:v1.0.53 .
-docker push apb.registry-img.com/app-uat/msp-counter:v1.0.53
+docker build --platform linux/amd64 -t apb.registry-img.com/app-uat/msp-counter:v1.0.54 .
+docker push apb.registry-img.com/app-uat/msp-counter:v1.0.54
 ```
 
 #### Notes

@@ -33,6 +33,13 @@ export const txnWalletApiSlice = createApi({
 			}),
 			providesTags: ({ page }) => [{ type: 'TxnWallet', id: `PAGE_${page}` }],
 		}),
+		getTxnWalletReportDetail: builder.mutation<any, { refNo: string }>({
+			query: ({ refNo }) => ({
+				url: '/txnWallet/report/detail',
+				method: 'POST',
+				body: { refNo },
+			}),
+		}),
 		getCustomerStatement: builder.query<
 			any,
 			{
@@ -200,6 +207,7 @@ export const txnWalletApiSlice = createApi({
 export const {
 	useGetProvinceQuery,
 	useGetTxnWalletReportQuery,
+	useGetTxnWalletReportDetailMutation,
 	useGetCustomerStatementQuery,
 	useGetSummaryGLQuery,
 	useGetSmsReportQuery,

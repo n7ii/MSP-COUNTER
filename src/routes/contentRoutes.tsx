@@ -4,7 +4,7 @@ import EWalletLimitPage from '@/pages/settings/ewalletLimit/eWalletLitmitPage.ts
 import ReconcilePage from '@/pages/reconcile/reconcilePage.tsx';
 import ApiManagementPage from '@/pages/apisManagement/apisManagementPage.tsx';
 import RevertPage from '@/pages/revert/revertPage.tsx';
-import SalaryPage from '@/pages/salary/salaryPage.tsx';
+// import SalaryPage from '@/pages/salary/salaryPage.tsx';
 
 // eslint-disable-next-line react-refresh/only-export-components
 const NotificationPage = lazy(() => import('@/pages/logs/notification/notificationPage.tsx'));
@@ -133,11 +133,11 @@ const contentRoutes: any[] = [
 		element: <RevertPage />,
 		allowedRoles: ['ROOT', 'ADMIN', 'RECONSILE'],
 	},
-	{
-		path: `${appPages.salaryPage.to}`,
-		element: <SalaryPage />,
-		allowedRoles: ['ROOT', 'ADMIN'],
-	},
+	// {
+	// 	path: `${appPages.salaryPage.to}`,
+	// 	element: <SalaryPage />,
+	// 	allowedRoles: ['ROOT', 'ADMIN'],
+	// },
 	/**
 	 * CUSTOMER::END
 	 */
