@@ -265,7 +265,16 @@ const SummaryGlPage = () => {
 				let filteredData = allData.body.content;
 
 				if (exportType !== 'ALL') {
-					filteredData = filteredData.filter((item: any) => item.stmType === exportType);
+					if (exportType === 'CASH_IN') {
+						// Match stmType LIKE %IN%
+						filteredData = filteredData.filter((item: any) =>
+							String(item.stmType || '').includes('IN'),
+						);
+					} else {
+						filteredData = filteredData.filter(
+							(item: any) => item.stmType === exportType,
+						);
+					}
 				}
 
 				// Apply channel filter

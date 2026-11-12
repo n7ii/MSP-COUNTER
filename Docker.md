@@ -15,10 +15,12 @@ npm run build
 
 Confirm `dist/` exists and contains `index.html`.
 
-#### 2) Build & push the Docker image
-```shell
-docker build --platform linux/amd64 -t apb.registry-img.com/app/msp-counter:v1.0.50 .
-docker push apb.registry-img.com/app/msp-counter:v1.0.50
+#### 2) Build & push the Docker image```shell
+
+###### PROD
+OLD - PROD .50
+docker build --platform linux/amd64 -t apb.registry-img.com/app/msp-counter:v1.0.54.2 .
+docker push apb.registry-img.com/app/msp-counter:v1.0.54.2
 
 # UAT
 docker build --platform linux/amd64 -t apb.registry-img.com/app-uat/msp-counter:v1.0.54 .
